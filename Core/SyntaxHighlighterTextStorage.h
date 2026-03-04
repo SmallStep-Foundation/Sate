@@ -5,7 +5,8 @@
 //  NSTextStorage subclass that applies syntax highlighting by language.
 //  Language is set from file extension; supports C, C++, ObjC, Java, C#,
 //  JavaScript, TypeScript, Python, PHP, Ruby, Swift, Go, Scala, Lua,
-//  Raku, Godot Script, Makefile, Assembly.
+//  Raku, Godot Script, Makefile, Assembly, Kotlin, Rust, Dart, R, Perl,
+//  Haskell, Julia, Elixir, Clojure, F#, Zig.
 //
 
 #import <AppKit/AppKit.h>
@@ -32,6 +33,17 @@ typedef NS_ENUM(NSInteger, SATELanguage) {
     SATELanguageGodotScript,
     SATELanguageMakefile,
     SATELanguageAssembly,
+    SATELanguageKotlin,
+    SATELanguageRust,
+    SATELanguageDart,
+    SATELanguageR,
+    SATELanguagePerl,
+    SATELanguageHaskell,
+    SATELanguageJulia,
+    SATELanguageElixir,
+    SATELanguageClojure,
+    SATELanguageFSharp,
+    SATELanguageZig,
 };
 
 @interface SyntaxHighlighterTextStorage : NSTextStorage

@@ -7,7 +7,8 @@ A text editor with syntax highlighting for GNUstep (Linux) and macOS. Uses [Smal
 Syntax highlighting is applied automatically from the file extension when you open or save a file.
 
 - **Top languages:** C, C++, Java, C#, JavaScript, TypeScript, Python, PHP, Ruby, Swift, Go  
-- **Additional:** Objective-C, Makefile, Scala, Raku, Lua, Godot Script (.gd), Assembly (.s, .asm, .as)
+- **Additional:** Objective-C, Makefile, Scala, Raku, Lua, Godot Script (.gd), Assembly (.s, .asm, .as)  
+- **Kotlin + next top 10:** Kotlin (.kt, .kts), Rust (.rs), Dart (.dart), R (.r), Perl (.pl, .pm), Haskell (.hs), Julia (.jl), Elixir (.ex, .exs), Clojure (.clj, .cljs, .cljc), F# (.fs, .fsi, .fsx), Zig (.zig)
 
 ## Build
 

@@ -84,6 +84,17 @@
     if ([ext isEqual:@"gd"]) return SATELanguageGodotScript;
     if ([ext isEqual:@"mk"]) return SATELanguageMakefile;
     if ([ext isEqual:@"s"] || [ext isEqual:@"asm"] || [ext isEqual:@"as"]) return SATELanguageAssembly;
+    if ([ext isEqual:@"kt"] || [ext isEqual:@"kts"]) return SATELanguageKotlin;
+    if ([ext isEqual:@"rs"]) return SATELanguageRust;
+    if ([ext isEqual:@"dart"]) return SATELanguageDart;
+    if ([ext isEqual:@"r"]) return SATELanguageR;
+    if ([ext isEqual:@"pl"] || [ext isEqual:@"pm"]) return SATELanguagePerl;
+    if ([ext isEqual:@"hs"]) return SATELanguageHaskell;
+    if ([ext isEqual:@"jl"]) return SATELanguageJulia;
+    if ([ext isEqual:@"ex"] || [ext isEqual:@"exs"]) return SATELanguageElixir;
+    if ([ext isEqual:@"clj"] || [ext isEqual:@"cljs"] || [ext isEqual:@"cljc"]) return SATELanguageClojure;
+    if ([ext isEqual:@"fs"] || [ext isEqual:@"fsi"] || [ext isEqual:@"fsx"]) return SATELanguageFSharp;
+    if ([ext isEqual:@"zig"]) return SATELanguageZig;
     return SATELanguageNone;
 }
 
@@ -112,11 +123,48 @@
     NSColor *preprocessorColor = _theme ? [_theme preprocessorColor] : [NSColor colorWithCalibratedRed:0.5 green:0.3 blue:0.0 alpha:1.0];
 
     /* Block comments first so they take precedence over line comments */
-    NSRegularExpression *blockComment = [NSRegularExpression regularExpressionWithPattern:@"(/\\*[\\s\\S]*?\\*/)" options:NSRegularExpressionDotMatchesLineSeparators error:NULL];
-    if (blockComment) {
-        NSArray *matches = [blockComment matchesInString:s options:0 range:range];
-        for (NSTextCheckingResult *res in matches) {
-            [self addAttributes:[NSDictionary dictionaryWithObject:commentColor forKey:NSForegroundColorAttributeName] range:[res rangeAtIndex:0]];
+    BOOL useCBlock = (_language == SATELanguageC || _language == SATELanguageCpp || _language == SATELanguageObjectiveC ||
+                      _language == SATELanguageJava || _language == SATELanguageCSharp || _language == SATELanguageJavaScript ||
+                      _language == SATELanguageTypeScript || _language == SATELanguageGo || _language == SATELanguageScala ||
+                      _language == SATELanguageSwift || _language == SATELanguageGodotScript || _language == SATELanguageKotlin ||
+                      _language == SATELanguageRust || _language == SATELanguageDart || _language == SATELanguageZig);
+    if (useCBlock) {
+        NSRegularExpression *blockComment = [NSRegularExpression regularExpressionWithPattern:@"(/\\*[\\s\\S]*?\\*/)" options:NSRegularExpressionDotMatchesLineSeparators error:NULL];
+        if (blockComment) {
+            NSArray *matches = [blockComment matchesInString:s options:0 range:range];
+            for (NSTextCheckingResult *res in matches) {
+                [self addAttributes:[NSDictionary dictionaryWithObject:commentColor forKey:NSForegroundColorAttributeName] range:[res rangeAtIndex:0]];
+            }
+        }
+    }
+    /* F# block comments (* *) */
+    if (_language == SATELanguageFSharp) {
+        NSRegularExpression *fsBlock = [NSRegularExpression regularExpressionWithPattern:@"(\\(\\*[\\s\\S]*?\\*\\))" options:NSRegularExpressionDotMatchesLineSeparators error:NULL];
+        if (fsBlock) {
+            NSArray *matches = [fsBlock matchesInString:s options:0 range:range];
+            for (NSTextCheckingResult *res in matches) {
+                [self addAttributes:[NSDictionary dictionaryWithObject:commentColor forKey:NSForegroundColorAttributeName] range:[res rangeAtIndex:0]];
+            }
+        }
+    }
+    /* Haskell block comments {- -} */
+    if (_language == SATELanguageHaskell) {
+        NSRegularExpression *hsBlock = [NSRegularExpression regularExpressionWithPattern:@"(\\{-[\\s\\S]*?-\\})" options:NSRegularExpressionDotMatchesLineSeparators error:NULL];
+        if (hsBlock) {
+            NSArray *matches = [hsBlock matchesInString:s options:0 range:range];
+            for (NSTextCheckingResult *res in matches) {
+                [self addAttributes:[NSDictionary dictionaryWithObject:commentColor forKey:NSForegroundColorAttributeName] range:[res rangeAtIndex:0]];
+            }
+        }
+    }
+    /* Julia block comments #= =# */
+    if (_language == SATELanguageJulia) {
+        NSRegularExpression *jlBlock = [NSRegularExpression regularExpressionWithPattern:@"(#=[\\s\\S]*?=#)" options:NSRegularExpressionDotMatchesLineSeparators error:NULL];
+        if (jlBlock) {
+            NSArray *matches = [jlBlock matchesInString:s options:0 range:range];
+            for (NSTextCheckingResult *res in matches) {
+                [self addAttributes:[NSDictionary dictionaryWithObject:commentColor forKey:NSForegroundColorAttributeName] range:[res rangeAtIndex:0]];
+            }
         }
     }
 
@@ -136,6 +184,12 @@
         case SATELanguageGodotScript:
             lineCommentPattern = @"(//[^\n]*)";
             break;
+        case SATELanguageKotlin:
+        case SATELanguageRust:
+        case SATELanguageDart:
+        case SATELanguageZig:
+            lineCommentPattern = @"(//[^\n]*)";
+            break;
         case SATELanguagePython:
         case SATELanguageRuby:
         case SATELanguagePHP:
@@ -143,11 +197,26 @@
         case SATELanguageRaku:
             lineCommentPattern = @"(#[^\n]*)";
             break;
+        case SATELanguageR:
+        case SATELanguagePerl:
+        case SATELanguageJulia:
+        case SATELanguageElixir:
+            lineCommentPattern = @"(#[^\n]*)";
+            break;
         case SATELanguageLua:
             lineCommentPattern = @"(--[^\n]*)";
             break;
+        case SATELanguageHaskell:
+            lineCommentPattern = @"(--[^\n]*)";
+            break;
+        case SATELanguageClojure:
+            lineCommentPattern = @"(;[^\n]*)";
+            break;
         case SATELanguageAssembly:
             lineCommentPattern = @"(;[^\n]*)";
+            break;
+        case SATELanguageFSharp:
+            lineCommentPattern = @"(//[^\n]*)";
             break;
         default:
             break;
@@ -267,6 +336,28 @@
             return [NSArray arrayWithObjects:@"ifdef", @"ifndef", @"ifeq", @"ifneq", @"else", @"endif", @"include", @"define", @"endef", @"export", @"unexport", @"vpath", @".PHONY", @"@", @"$@", @"$<", @"$^", nil];
         case SATELanguageAssembly:
             return [NSArray arrayWithObjects:@"section", @"text", @"data", @"bss", @"global", @"extern", @"align", @"db", @"dw", @"dd", @"dq", @"resb", @"resw", @"resd", @"resq", @"equ", @"times", @"mov", @"push", @"pop", @"call", @"ret", @"add", @"sub", @"mul", @"div", @"inc", @"dec", @"cmp", @"jmp", @"je", @"jne", @"jg", @"jge", @"jl", @"jle", @"int", @".intel_syntax", @".att_syntax", @".globl", @".type", @".size", @".string", @".asciz", @".byte", @".word", @".long", @".quad", @".text", @".data", @".bss", nil];
+        case SATELanguageKotlin:
+            return [NSArray arrayWithObjects:@"if", @"else", @"while", @"for", @"do", @"when", @"try", @"catch", @"finally", @"throw", @"return", @"break", @"continue", @"class", @"interface", @"object", @"fun", @"val", @"var", @"true", @"false", @"null", @"this", @"super", @"in", @"is", @"as", @"package", @"import", @"typealias", @"data", @"sealed", @"enum", @"companion", @"init", @"constructor", @"open", @"override", @"abstract", @"final", @"internal", @"private", @"protected", @"public", @"by", @"reified", @"inline", @"noinline", @"crossinline", @"suspend", @"operator", @"infix", nil];
+        case SATELanguageRust:
+            return [NSArray arrayWithObjects:@"if", @"else", @"while", @"for", @"loop", @"match", @"fn", @"struct", @"enum", @"impl", @"trait", @"mod", @"use", @"pub", @"mut", @"ref", @"self", @"Self", @"async", @"await", @"move", @"static", @"const", @"let", @"return", @"break", @"continue", @"true", @"false", @"type", @"where", @"unsafe", @"extern", @"crate", @"super", @"dyn", @"box", @"virtual", @"default", nil];
+        case SATELanguageDart:
+            return [NSArray arrayWithObjects:@"if", @"else", @"for", @"while", @"do", @"switch", @"case", @"default", @"try", @"catch", @"finally", @"throw", @"return", @"break", @"continue", @"class", @"extends", @"implements", @"with", @"abstract", @"static", @"final", @"const", @"var", @"void", @"dynamic", @"get", @"set", @"super", @"this", @"new", @"true", @"false", @"null", @"async", @"await", @"yield", @"sync", @"external", @"factory", @"operator", @"part", @"import", @"export", @"library", @"show", @"hide", @"on", @"rethrow", @"assert", @"late", @"required", @"covariant", @"mixin", @"extension", @"typedef", @"enum", nil];
+        case SATELanguageR:
+            return [NSArray arrayWithObjects:@"if", @"else", @"for", @"while", @"repeat", @"break", @"next", @"return", @"function", @"in", @"TRUE", @"FALSE", @"NULL", @"NA", @"Inf", @"NaN", @"T", @"F", @"library", @"require", @"source", @"UseMethod", @"NextMethod", @"class", @"structure", @"attr", @"attributes", @"missing", nil];
+        case SATELanguagePerl:
+            return [NSArray arrayWithObjects:@"if", @"else", @"elsif", @"unless", @"while", @"until", @"for", @"foreach", @"do", @"given", @"when", @"default", @"sub", @"my", @"our", @"local", @"state", @"use", @"require", @"package", @"return", @"last", @"next", @"redo", @"goto", @"undef", @"bless", @"ref", @"q", @"qq", @"qw", @"qx", @"tr", @"y", @"s", @"m", @"qr", @"split", @"join", @"grep", @"map", @"sort", @"keys", @"values", @"each", @"exists", @"defined", @"delete", @"shift", @"unshift", @"push", @"pop", @"splice", @"scalar", @"array", @"hash", @"eq", @"ne", @"lt", @"le", @"gt", @"ge", @"cmp", @"and", @"or", @"not", @"xor", @"true", @"false", @"BEGIN", @"END", @"INIT", @"CHECK", @"DESTROY", @"AUTOLOAD", nil];
+        case SATELanguageHaskell:
+            return [NSArray arrayWithObjects:@"if", @"then", @"else", @"case", @"of", @"let", @"in", @"where", @"do", @"mdo", @"rec", @"data", @"type", @"newtype", @"class", @"instance", @"deriving", @"default", @"import", @"hiding", @"qualified", @"as", @"module", @"where", @"infix", @"infixl", @"infixr", @"forall", @"foreign", @"export", @"safe", @"unsafe", @"ccall", @"stdcall", @"cplusplus", @"dotnet", @"jvm", @"family", @"role", @"pattern", @"static", @"group", @"by", @"using", @"True", @"False", @"Nothing", @"Just", @"Maybe", @"Either", @"Left", @"Right", @"IO", @"return", @"pure", @"fmap", @">>=", @">>", @"=", @"<-", @"->", @"::", @"\\", @"@", @"!", @"~", @"as", @"qualified", nil];
+        case SATELanguageJulia:
+            return [NSArray arrayWithObjects:@"if", @"else", @"elseif", @"end", @"for", @"while", @"break", @"continue", @"function", @"return", @"struct", @"mutable", @"abstract", @"type", @"primitive", @"quote", @"try", @"catch", @"finally", @"global", @"local", @"const", @"let", @"begin", @"do", @"using", @"import", @"export", @"in", @"isa", @"where", @"macro", @"module", @"baremodule", @"true", @"false", @"nothing", @"missing", @"undef", @"ans", @"outer", nil];
+        case SATELanguageElixir:
+            return [NSArray arrayWithObjects:@"def", @"defp", @"defmodule", @"defprotocol", @"defimpl", @"defstruct", @"defmacro", @"defmacrop", @"defdelegate", @"defoverridable", @"defexception", @"if", @"unless", @"case", @"cond", @"receive", @"after", @"when", @"and", @"or", @"not", @"in", @"true", @"false", @"nil", @"when", @"do", @"end", @"else", @"rescue", @"catch", @"raise", @"import", @"require", @"alias", @"use", @"quote", @"unquote", @"super", @"with", @"for", @"fn", @"->", nil];
+        case SATELanguageClojure:
+            return [NSArray arrayWithObjects:@"def", @"defn", @"defn-", @"defmacro", @"defmulti", @"defmethod", @"defonce", @"defprotocol", @"defrecord", @"defstruct", @"deftype", @"definterface", @"reify", @"extend", @"extend-type", @"extend-protocol", @"fn", @"if", @"when", @"when-not", @"when-let", @"if-let", @"cond", @"condp", @"case", @"for", @"doseq", @"dotimes", @"while", @"loop", @"recur", @"let", @"letfn", @"binding", @"do", @"try", @"catch", @"finally", @"throw", @"ns", @"in-ns", @"refer", @"require", @"use", @"import", @"load", @"load-file", @"eval", @"quote", @"var", @"deref", @"ref", @"atom", @"swap!", @"reset!", @"alter", @"commute", @"delay", @"future", @"promise", @"true", @"false", @"nil", @"and", @"or", @"not", @"some", @"if-some", @"when-some", @"when-first", @"comment", @"declare", @"proxy", @"gen-class", @"gen-delegate", @"repeatedly", @"replicate", @"iterate", @"range", @"merge", @"merge-with", @"zipmap", @"first", @"rest", @"next", @"last", @"nth", @"get", @"assoc", @"dissoc", @"contains?", @"find", @"keys", @"vals", @"name", @"namespace", @"keyword", @"symbol", @"str", @"format", @"count", @"empty?", @"not-empty", @"into", @"apply", @"map", @"filter", @"remove", @"reduce", @"take", @"drop", @"take-while", @"drop-while", @"partition", @"group-by", @"sort", @"sort-by", @"seq?", @"sequential?", @"list?", @"vector?", @"set?", @"map?", @"coll?", @"count", @"get-in", @"assoc-in", @"update-in", @"peek", @"pop", @"conj", @"persistent!", @"transient", @"lazy-cat", @"lazy-seq", @"force", @"realized?", @"deref", @"ref-set", @"alter", @"commute", @"ensure", @"send", @"send-off", @"add-watch", @"remove-watch", @"agent-error", @"restart-agent", @"shutdown-agents", @"await", @"promise", @"deliver", @"future", @"future-cancel", @"future-cancelled?", @"future-done?", @"future?", @"pcalls", @"pmap", @"derive", @"isa?", @"parents", @"ancestors", @"descendants", @"underive", nil];
+        case SATELanguageFSharp:
+            return [NSArray arrayWithObjects:@"if", @"then", @"else", @"elif", @"match", @"with", @"when", @"for", @"in", @"do", @"while", @"try", @"catch", @"finally", @"raise", @"let", @"mutable", @"rec", @"and", @"or", @"not", @"fun", @"function", @"type", @"module", @"namespace", @"open", @"exception", @"class", @"interface", @"inherit", @"default", @"override", @"abstract", @"member", @"static", @"val", @"new", @"typeof", @"typedefof", @"null", @"true", @"false", @"lazy", @"yield", @"return", @"use", @"assert", @"begin", @"end", @"done", @"to", @"downto", @"as", @"box", @"unbox", @"ref", @"sig", @"struct", @"include", @"const", @"external", @"inline", @"private", @"public", @"internal", @"global", @"delegate", @"base", @"this", @"operator", @"enum", @"union", @"record", @"and", @"as", @"asr", @"begin", @"class", @"const", @"do", @"done", @"downto", @"elif", @"else", @"end", @"exception", @"extern", @"false", @"finally", @"for", @"fun", @"function", @"functor", @"global", @"if", @"in", @"include", @"inherit", @"inline", @"interface", @"internal", @"land", @"lazy", @"let", @"load", @"lor", @"lsl", @"lsr", @"lxor", @"match", @"method", @"mod", @"module", @"mutable", @"namespace", @"new", @"not", @"null", @"of", @"open", @"or", @"override", @"private", @"public", @"rec", @"return", @"sig", @"static", @"struct", @"then", @"to", @"true", @"try", @"type", @"val", @"virtual", @"void", @"volatile", @"when", @"while", @"with", @"yield", nil];
+        case SATELanguageZig:
+            return [NSArray arrayWithObjects:@"if", @"else", @"while", @"for", @"switch", @"inline", @"var", @"const", @"volatile", @"export", @"extern", @"packed", @"noalias", @"comptime", @"nakedcc", @"stdcallcc", @"async", @"fn", @"return", @"break", @"continue", @"asm", @"defer", @"errdefer", @"try", @"catch", @"async", @"await", @"suspend", @"resume", @"cancel", @"noinline", @"callconv", @"linksection", @"align", @"allowzero", @"addrspace", @"call", @"nosuspend", @"anytype", @"anyframe", @"unreachable", @"undefined", @"null", @"true", @"false", @"struct", @"union", @"enum", @"error", @"opaque", @"test", @"pub", @"packed", @"threadlocal", @"export", @"extern", @"inline", @"noinline", @"comptime", @"noalias", @"c_export", @"c_import", @"linksection", @"align", @"allowzero", @"addrspace", @"callconv", @"noinline", @"setCold", @"setRuntimeSafety", @"setEvalBranchQuota", @"setFloatMode", @"setObjectSafety", @"type", @"break", @"return", @"block", @"loop", @"anytype", @"anyframe", @"payload", @"pointer", @"addr", @"len", @"ptr", @"init", @"tag", @"error", @"items", @"values", @"key", @"value", nil];
         default:
             return [NSArray array];
     }
