@@ -8,6 +8,7 @@
 #import "SSAppDelegate.h"
 #import "SSHostApplication.h"
 #import "SSMainMenu.h"
+#import "SSAboutPanel.h"
 #import "SATEThemeManager.h"
 #import "TEThemePanel.h"
 
@@ -32,6 +33,9 @@
 #if !TARGET_OS_IPHONE
     SSMainMenu *menu = [[SSMainMenu alloc] init];
     [menu setAppName:@"SmallAdvancedTextEditor"];
+    [menu setAboutAppName:@"SmallAdvancedTextEditor"];
+    [menu setAboutVersion:@"1.0"];
+    [menu setAboutTarget:self];
     NSArray *items = [NSArray arrayWithObjects:
         [SSMainMenuItem itemWithTitle:@"New" action:@selector(newDocument:) keyEquivalent:@"n" modifierMask:NSCommandKeyMask target:self],
         [SSMainMenuItem itemWithTitle:@"Open…" action:@selector(openDocument:) keyEquivalent:@"o" modifierMask:NSCommandKeyMask target:self],
@@ -121,6 +125,11 @@
 - (void)themeCustomize:(id)sender {
     (void)sender;
     [TEThemePanel showPanel];
+}
+
+- (void)showAbout:(id)sender {
+    (void)sender;
+    [SSAboutPanel showWithAppName:@"SmallAdvancedTextEditor" version:@"1.0"];
 }
 
 #if defined(GNUSTEP) && !__has_feature(objc_arc)
