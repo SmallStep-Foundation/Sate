@@ -12,16 +12,16 @@ Syntax highlighting is applied automatically from the file extension when you op
 
 ## Build
 
-1. Build and install SmallStepLib:
+1. Build SmallStepLib:
    ```bash
-   cd ../SmallStepLib && make && make install
+   cd ../SmallStepLib && make
    ```
 2. Build the app:
    ```bash
-   cd ../SmallAdvancedTextEditor && make
+   cd ../Sate && make
    ```
 
-Run with `openapp SmallAdvancedTextEditor` (GNUstep) or run the app bundle on macOS.
+Run with `openapp ./SmallAdvancedTextEditor.app` (GNUstep) or run the app bundle on macOS.
 
 ## Usage
 

@@ -20,6 +20,14 @@
 @synthesize theme = _theme;
 #endif
 
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        _backing = [[NSMutableAttributedString alloc] init];
+    }
+    return self;
+}
+
 #if defined(GNUSTEP) && !__has_feature(objc_arc)
 - (void)dealloc {
     [_backing release];

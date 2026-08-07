@@ -41,6 +41,7 @@
         [SSMainMenuItem itemWithTitle:@"Open…" action:@selector(openDocument:) keyEquivalent:@"o" modifierMask:NSCommandKeyMask target:self],
         [SSMainMenuItem itemWithTitle:@"Save" action:@selector(saveDocument:) keyEquivalent:@"s" modifierMask:NSCommandKeyMask target:self],
         [SSMainMenuItem itemWithTitle:@"Save As…" action:@selector(saveDocumentAs:) keyEquivalent:@"" modifierMask:0 target:self],
+        [SSMainMenuItem itemWithTitle:@"Export a Copy…" action:@selector(exportACopy:) keyEquivalent:@"" modifierMask:0 target:self],
         nil];
     [menu buildMenuWithItems:items quitTitle:@"Quit SmallAdvancedTextEditor" quitKeyEquivalent:@"q"];
     [menu install];
@@ -69,6 +70,11 @@
 - (void)saveDocumentAs:(id)sender {
     (void)sender;
     [_mainWindow saveDocumentAs];
+}
+
+- (void)exportACopy:(id)sender {
+    (void)sender;
+    [_mainWindow exportACopy];
 }
 
 - (void)addThemeMenu {
